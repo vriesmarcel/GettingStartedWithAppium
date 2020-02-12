@@ -18,4 +18,7 @@
     <PackageReference Include="Selenium.Support" Version="3.141.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Remove="EmptyCSharpFile.cs" />
+  </ItemGroup>
 </Project>

@@ -27,7 +27,7 @@ namespace App1
             
             cell.TextLabel.Text = items[indexPath.Row].Text;
             cell.DetailTextLabel.Text = items[indexPath.Row].Description;
-            cell.AccessibilityIdentifier = items[indexPath.Row].Text.Replace(" ","");
+            cell.AccessibilityIdentifier = items[indexPath.Row].Text;
             return cell;
         }
 

@@ -8,13 +8,15 @@ namespace App1
     {
         public MyTableViewController (IntPtr handle) : base (handle)
         {
+            this.TableView.AccessibilityIdentifier = "maintable";
         }
 
-        //public override void ViewDidLoad()
-        //{
-        //    this.TableView.Source = new ItemsViewSource(this);
+        public override void ViewDidLoad()
+        {
+            this.TableView.Source = new ItemsViewSource(this);
 
-        //}
+
+        }
 
         public override void ViewDidAppear(bool animated)
         {

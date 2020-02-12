@@ -20,114 +20,32 @@ using System.Threading;
 namespace CarvedRock.UITests
 {
     [TestClass]
-    public class iOSUWPTests
+    public class iOSTests
     {
         static TestContext ctx;
-        private static IOSDriver<IOSElement> driver;
+
         [ClassInitialize]
         static public void Initialize(TestContext context)
         {
             ctx = context;
-            var capabilities = new AppiumOptions();
-
-            capabilities.AddAdditionalCapability(IOSMobileCapabilityType.BundleId, "com.fluentbytes.carvedrock");
-            capabilities.AddAdditionalCapability(MobileCapabilityType.PlatformName, "ios");
-            capabilities.AddAdditionalCapability(MobileCapabilityType.DeviceName, "iPhone 11");
-            capabilities.AddAdditionalCapability(MobileCapabilityType.AutomationName, "XCUITest");
-            capabilities.AddAdditionalCapability(MobileCapabilityType.PlatformVersion, "13.3");
-
-           // var _appiumLocalService = new AppiumServiceBuilder().UsingAnyFreePort().Build();
-           // _appiumLocalService.Start(); ;
-            //driver = new IOSDriver<IOSElement>(_appiumLocalService, capabilities);
-            driver = new IOSDriver<IOSElement>(new Uri("http://127.0.0.1:4723/wd/hub"), capabilities);
-            //driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(5);
-
         }
-
-        [TestMethod]
-        public void ScrollToEndOfListUsingRemoteTouchScreenFlick()
-        {
-            driver.LaunchApp();
-
-            var touchScreen = new RemoteTouchScreen(driver);
-
-            touchScreen.Flick(0, 160);
-            touchScreen.Flick(0, 160);
-
-            driver.CloseApp();
-
-        }
-
-        [TestMethod]
-        public void ScrollToEndOfListUsingRemoteTouchScreenScroll()
-        {
-            driver.LaunchApp();
-
-            var touchScreen = new RemoteTouchScreen(driver);
-            touchScreen.Scroll(0, -300);
-            touchScreen.Scroll(0, -300);
-
-            driver.CloseApp();
-
-        }
-
-        [TestMethod]
-        public void GetUIDocument()
-        {
-            driver.LaunchApp();
-            var document = driver.PageSource;
-            ctx.WriteLine(document);
-
-        }
-
-        [TestMethod]
-        public void TapElementWeFind()
-        {
-            driver.LaunchApp();
-
-            var ListView = driver.FindElement(MobileBy.ClassName("ListView"));
-            ListView.Click();
-
-            driver.CloseApp();
-        }
-        [TestMethod]
-        public void ScrollToEndOfListUsingPointerInputDevice()
-        {
-            driver.LaunchApp();
-            var ListView = driver.FindElement(MobileBy.ClassName("ListView"));
-
-            // set start point
-            FlickUp(driver, ListView);
-
-            Thread.Sleep(3000);
-
-            FlickUp(driver, ListView);
-
-
-            Thread.Sleep(3000);
-
-            driver.CloseApp();
-
-        }
-
-
-
+ 
         [TestMethod]
         public void CheckMasterDetailAndBack()
         {
-            driver.LaunchApp();
+
+            IOSDriver<IOSElement> driver = StartApp();
             // tap on second item
             var el1 = driver.FindElementByAccessibilityId("Second item");
-       
-            TouchAction a = new TouchAction(driver);
-            a.Tap(el1);
+            el1.Click();
             
-
             var el2 = driver.FindElementByAccessibilityId("ItemText");
-            Assert.IsTrue(el2.Text == "Second item");
+            var txt = el2.Text;
+            Assert.IsTrue(txt == "Second item");
 
-            var backButton = driver.FindElementByAccessibilityId("Back");
-            backButton.Click();
+            // find root view controller link
+            var elback = driver.FindElementByAccessibilityId("Root View Controller");
+            elback.Click();
 
             var el3 = driver.FindElementByAccessibilityId("Fourth item");
             Assert.IsTrue(el3 != null);
@@ -139,77 +57,94 @@ namespace CarvedRock.UITests
         [TestMethod]
         public void AddNewItem()
         {
-            driver.LaunchApp();
+            IOSDriver<IOSElement> driver = StartApp();
             // tap on second item
             var el1 = driver.FindElementByAccessibilityId("Add");
-            TouchAction a = new TouchAction(driver);
-            a.Tap(el1);
             el1.Click();
+
             var elItemText = driver.FindElementByAccessibilityId("ItemText");
             elItemText.Clear();
             elItemText.SendKeys("This is a new Item");
 
-            var elItemDetail = driver.FindElementByAccessibilityId("ItemDescription");
+            var elItemDetail = driver.FindElementByAccessibilityId("ItemDetailsText");
             elItemDetail.Clear();
             elItemDetail.SendKeys("These are the details");
 
-            var elSave = driver.FindElementByAccessibilityId("Save");
+            var elSave = driver.FindElementByAccessibilityId("Add");
+            CreateScreenshot(driver);
             elSave.Click();
 
-            WaitForProgressbarToDisapear(driver);
+            var scrollableElement = driver.FindElementByAccessibilityId("maintable");
 
-            var touchScreen = new RemoteTouchScreen(driver);
-            Boolean found = false;
-            var maxretries = 5;
-            int count = 0;
-            while (!found && count++ < maxretries)
+            Func<AppiumWebElement> FindElementAction = () =>
             {
-                // Good value typically goes around 160 - 200 pixels with diminishing delta on the bigger values
-                touchScreen.Flick(0, 180);
-                try
-                {
-                    var el3 = driver.FindElementByAccessibilityId("This is a new Item");
-                    found = el3 != null;
-                }
-                catch (Exception)
-                { }
-            }
-            Assert.IsTrue(found);
+                // find all text views
+                // check if the text matches
+                var element = driver.FindElementByAccessibilityId("This is a new Item");
+
+                return element;
+            };
+
+            var elementFound = ScrollUntillItemFound(driver, scrollableElement, FindElementAction);
 
 
+            Assert.IsTrue(elementFound != null);
             driver.CloseApp();
 
         }
 
-        private void WaitForProgressbarToDisapear(IOSDriver<IOSElement> driver)
+        private AppiumWebElement ScrollUntillItemFound(IOSDriver<IOSElement> driver, AppiumWebElement relativeTo, Func<AppiumWebElement> FindElementAction)
         {
             var wait = new DefaultWait<IOSDriver<IOSElement>>(driver)
             {
                 Timeout = TimeSpan.FromSeconds(60),
-                PollingInterval = TimeSpan.FromMilliseconds(500)
+                PollingInterval = TimeSpan.FromMilliseconds(1000)
             };
             wait.IgnoreExceptionTypes(typeof(NoSuchElementException));
+            AppiumWebElement elementfound = null;
 
-            wait.Until(d => d.FindElementByAccessibilityId("Second item"));
+            elementfound = wait.Until(d =>
+            {
+                SwipeUp(driver, relativeTo);
+
+                return FindElementAction();
+            });
+
+            return elementfound;
         }
 
-        private void CreateScreenshot()
+        
+        private void CreateScreenshot(IOSDriver<IOSElement> driver)
         {
             var screenshot = driver.GetScreenshot();
             screenshot.SaveAsFile("startScreen.png", OpenQA.Selenium.ScreenshotImageFormat.Png);
             ctx.AddResultFile("startScreen.png");
         }
 
-        private void FlickUp(IOSDriver<IOSElement> driver, AppiumWebElement element)
+        private static void SwipeUp(IOSDriver<IOSElement> driver, AppiumWebElement element)
         {
-            var input = new PointerInputDevice(PointerKind.Touch);
-            ActionSequence FlickUp = new ActionSequence(input);
-            FlickUp.AddAction(input.CreatePointerMove(element, 0, 0, TimeSpan.Zero));
-            FlickUp.AddAction(input.CreatePointerDown(MouseButton.Left));
-            FlickUp.AddAction(input.CreatePointerMove(element, 0, 600, TimeSpan.FromMilliseconds(200)));
-            FlickUp.AddAction(input.CreatePointerUp(MouseButton.Left));
-            driver.PerformActions(new List<ActionSequence>() { FlickUp });
+            string script = "mobile: swipe";
+            Dictionary<string, string> parameters = new Dictionary<string, string>();
+            parameters.Add("direction", "up");
+            parameters.Add("element", element.Id);
+            driver.ExecuteScript(script, parameters);
         }
+
+        private static IOSDriver<IOSElement> StartApp()
+        {
+            System.Environment.SetEnvironmentVariable("DEVELOPER_DIR", @"/Applications/Xcode.app");
+
+            var capabilities = new AppiumOptions();
+            capabilities.AddAdditionalCapability(IOSMobileCapabilityType.BundleId, "com.fluentbytes.carvedrock");
+            capabilities.AddAdditionalCapability(MobileCapabilityType.PlatformName, "ios");
+            capabilities.AddAdditionalCapability(MobileCapabilityType.DeviceName, "iPhone 11");
+            capabilities.AddAdditionalCapability(MobileCapabilityType.AutomationName, "XCUITest");
+            capabilities.AddAdditionalCapability(MobileCapabilityType.PlatformVersion, "13.3");
+
+            var driver = new IOSDriver<IOSElement>(new Uri("http://127.0.0.1:4723/wd/hub"), capabilities);
+            return driver;
+        }
+
     }
 }
 
