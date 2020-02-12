@@ -21,4 +21,7 @@
   <ItemGroup>
     <Compile Remove="EmptyCSharpFile.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <None Remove="EmptyTextFile.txt" />
+  </ItemGroup>
 </Project>
