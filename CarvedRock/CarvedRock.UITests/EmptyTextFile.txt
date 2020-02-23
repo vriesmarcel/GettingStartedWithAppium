@@ -1,5 +1,0 @@
-﻿Class Initialization method CarvedRock.UITests.iOSUWPTests.Initialize threw exception.
- OpenQA.Selenium.WebDriverException: OpenQA.Selenium.WebDriverException:
-An unknown server-side error occurred while processing the command.
-Original error: Could not determine iOS SDK version: Command 'xcrun --sdk iphonesimulator
---show-sdk-version' timed out after 15000ms.
