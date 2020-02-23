@@ -28,8 +28,96 @@ namespace CarvedRock.UITests
         static public void Initialize(TestContext context)
         {
             ctx = context;
+<<<<<<< HEAD
         }
  
+=======
+            var capabilities = new AppiumOptions();
+
+            capabilities.AddAdditionalCapability(IOSMobileCapabilityType.BundleId, "com.fluentbytes.carvedrock");
+            capabilities.AddAdditionalCapability(MobileCapabilityType.PlatformName, "ios");
+            capabilities.AddAdditionalCapability(MobileCapabilityType.DeviceName, "iPhone 11");
+            capabilities.AddAdditionalCapability(MobileCapabilityType.AutomationName, "XCUITest");
+            capabilities.AddAdditionalCapability(MobileCapabilityType.PlatformVersion, "13.3");
+
+           // var _appiumLocalService = new AppiumServiceBuilder().UsingAnyFreePort().Build();
+           // _appiumLocalService.Start(); ;
+            //driver = new IOSDriver<IOSElement>(_appiumLocalService, capabilities);
+            driver = new IOSDriver<IOSElement>(new Uri("http://127.0.0.1:4723/wd/hub"), capabilities);
+            //driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(5);
+
+        }
+
+        //[TestMethod]
+        //public void ScrollToEndOfListUsingRemoteTouchScreenFlick()
+        //{
+        //    driver.LaunchApp();
+
+        //    var touchScreen = new RemoteTouchScreen(driver);
+        //    var el1 = driver.FindElement(MobileBy.Name("bla"));
+        //    el1.FindElementsByIosUIAutomation
+        //    touchScreen.Flick(0, 160);
+        //    touchScreen.Flick(0, 160);
+
+        //    driver.CloseApp();
+
+        //}
+
+        [TestMethod]
+        public void ScrollToEndOfListUsingRemoteTouchScreenScroll()
+        {
+            driver.LaunchApp();
+
+            var touchScreen = new RemoteTouchScreen(driver);
+            touchScreen.Scroll(0, -300);
+            touchScreen.Scroll(0, -300);
+
+            driver.CloseApp();
+
+        }
+
+        [TestMethod]
+        public void GetUIDocument()
+        {
+            driver.LaunchApp();
+            var document = driver.PageSource;
+            ctx.WriteLine(document);
+
+        }
+
+        [TestMethod]
+        public void TapElementWeFind()
+        {
+            driver.LaunchApp();
+
+            var ListView = driver.FindElement(MobileBy.ClassName("ListView"));
+            ListView.Click();
+
+            driver.CloseApp();
+        }
+        [TestMethod]
+        public void ScrollToEndOfListUsingPointerInputDevice()
+        {
+            driver.LaunchApp();
+            var ListView = driver.FindElement(MobileBy.ClassName("ListView"));
+
+            // set start point
+            FlickUp(driver, ListView);
+
+            Thread.Sleep(3000);
+
+            FlickUp(driver, ListView);
+
+
+            Thread.Sleep(3000);
+
+            driver.CloseApp();
+
+        }
+
+
+
+>>>>>>> 868342a0e02aeb8c5b4b487a70657bced88dde28
         [TestMethod]
         public void CheckMasterDetailAndBack()
         {

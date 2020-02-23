@@ -1,5 +1,8 @@
-﻿using System;
+﻿using CarvedRock.Models;
+using CarvedRock.Services;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,20 +15,52 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using Xamarin.Forms;
-using Xamarin.Forms.Platform.WPF;
-namespace CarvedRock.wpf
+
+namespace CarvedRock.Wpf
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : FormsApplicationPage
+    public partial class MainWindow : Window, INotifyPropertyChanged
     {
+        public IEnumerable<Item> Items { get; set; }
+
         public MainWindow()
         {
             InitializeComponent();
-            Forms.Init();
-            LoadApplication(App());
+            MockDataStore store = new MockDataStore();
+            Items = store.GetItemsAsync().Result;
+            this.DataContext = this;
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        private void OnAddClicked(object sender, RoutedEventArgs e)
+        {
+            var AddWindow = new AddNewItem();
+            AddWindow.ShowInTaskbar = false;
+            AddWindow.Owner = Application.Current.MainWindow;
+            AddWindow.ShowDialog();
+            MockDataStore store = new MockDataStore(); 
+            Items = store.GetItemsAsync().Result;
+            // NotifyPropertyChanged("Items");
+            this.DataContext = null;
+            this.DataContext = this;
+        }
+
+        private void NotifyPropertyChanged(string propertyName)
+        {
+            if (PropertyChanged != null)
+                PropertyChanged.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        private void ListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var detailsWindow = new ItemDetail();
+            detailsWindow.Item = listview.SelectedItem as Item;
+            detailsWindow.ShowInTaskbar = false;
+            detailsWindow.Owner = Application.Current.MainWindow;
+            detailsWindow.ShowDialog();
         }
     }
 }
