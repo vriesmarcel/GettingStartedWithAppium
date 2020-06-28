@@ -83,5 +83,5 @@ jobs:
     - name: Upload Artifact
       uses: actions/upload-artifact@v1.0.0
       with:
-        name: published_webapp
-        path: ${{ env.Wap_Project_Directory }}\AppPackages
+        name: published App Package
+        path: \**\AppPackages\
