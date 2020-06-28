@@ -75,9 +75,9 @@ jobs:
       uses: NuGet/setup-nuget@v1.0.2
 
     - name: Restore NuGet Packages
-      run: nuget restore SimpleFrameworkApp.sln
+      run: nuget restore ${{env.Solution_Name}}
  
-    - name: Build and Publish Web App
+    - name: Build UWP App
       run: msbuild ${{env.Solution_Name}} /p:AppxBundlePlatforms="${{env.buildPlatform}}" /p:AppxPackageDir="${{ env.appxPackageDir }}" /p:AppxBundle=Always /p:UapAppxPackageBuildMode=StoreUpload 
  
     - name: Upload Artifact
