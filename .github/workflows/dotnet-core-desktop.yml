@@ -61,7 +61,7 @@ jobs:
       Wap_Project_Directory: 'CarvedRock'                                               # Replace with the Wap project directory relative to the solution, i.e. MyWpfApp.Package.
       Wap_Project_Path: 'CarvedRock\CarvedRock.UWP\CarvedRock.UWP.csproj'               # Replace with the path to your Wap project, i.e. MyWpf.App.Package\MyWpfApp.Package.wapproj.
       buildPlatform: 'x86|x64|ARM'
-      appxPackageDir: '${{job.artifactStagingDirectory}}\AppxPackages\\'
+      appxPackageDir: 'CarvedRock\AppxPackages\\'
     steps:
     - name: Checkout
       uses: actions/checkout@v2
