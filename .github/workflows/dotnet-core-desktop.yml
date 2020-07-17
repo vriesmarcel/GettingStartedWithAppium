@@ -46,7 +46,7 @@ jobs:
       run: msbuild ${{env.Solution_Name}} /p:AppxBundlePlatforms="${{env.buildPlatform}}" /p:AppxPackageDir="${{ env.appxPackageDir }}" /p:AppxBundle=Always /p:UapAppxPackageBuildMode=StoreUpload 
  
     - name: Install UWP App
-      run: powershell CarvedRock\CarvedRock.UWP\${{env.appxPackageDir}}\CarvedRock.UWP_1.0.0.0_Debug_Test\Add-AppDevPackage.ps1 -Force
+      run: powershell CarvedRock\CarvedRock.UWP\${{env.appxPackageDir}}\CarvedRock.UWP_1.0.0.0_Debug_Test\Install.ps1 -Force
       
     - name: install appium
       uses: actions/setup-node@v1
